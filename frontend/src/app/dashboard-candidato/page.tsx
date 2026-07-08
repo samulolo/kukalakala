@@ -26,7 +26,7 @@ function getInitials(name: string) {
 
 export default async function CandidateDashboardPage({ searchParams }: Props) {
   const params = await searchParams;
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const authToken = cookieStore.get("kukalakala_session")?.value;
   const data = await getCandidateDashboardData({
     candidateId: params?.candidateId,

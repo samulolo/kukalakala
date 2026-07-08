@@ -15,7 +15,8 @@ type Props = {
 
 export default async function EditDashboardJobPage({ params }: Props) {
   const { jobId } = await params;
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const job = await getDashboardJobById(jobId, authToken);
 
   if (!job) {

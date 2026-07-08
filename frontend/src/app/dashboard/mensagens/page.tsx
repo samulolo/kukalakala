@@ -100,7 +100,8 @@ function matchesSearch(application: DashboardApplication, search: string) {
 export default async function DashboardMessagesPage({ searchParams }: Props) {
   const params = await searchParams;
   const search = params?.q?.trim().toLowerCase() ?? "";
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const applicationsData = await getDashboardApplications({ page: "1", limit: "100", authToken });
   const feedbackApplications = applicationsData.items
     .filter(hasFeedback)

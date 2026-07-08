@@ -13,7 +13,8 @@ type Props = {
 
 export default async function DashboardCandidatesPage({ searchParams }: Props) {
   const params = await searchParams;
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const applicationsData = await getDashboardApplications({
     page: params?.page ?? "1",
     limit: "10",

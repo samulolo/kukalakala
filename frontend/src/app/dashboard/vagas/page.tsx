@@ -15,7 +15,8 @@ type Props = {
 
 export default async function DashboardJobsPage({ searchParams }: Props) {
   const params = await searchParams;
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const status = params?.status ?? "all";
   const jobsData = await getDashboardJobs({
     page: params?.page ?? "1",

@@ -92,7 +92,6 @@ export default function RegisterPage() {
           </Link>
         </p>
 
-        {/* Social buttons */}
         <div className="mt-6 grid grid-cols-2 gap-2.5">
           <button
             type="button"
@@ -117,16 +116,15 @@ export default function RegisterPage() {
           </button>
         </div>
 
-        {/* Divider */}
         <div className="relative my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-[#e4e7ec]" />
           <span className="text-[0.73rem] text-[#9ca3af]">ou continua com email</span>
           <div className="h-px flex-1 bg-[#e4e7ec]" />
         </div>
 
-        {/* Form */}
+
         <form className="flex flex-col gap-4" onSubmit={handleRegister}>
-          {/* Account type */}
+      
           <div className="flex rounded-xl bg-[#f5f6f8] p-1">
             {(["candidate", "company"] as const).map((t) => (
               <button

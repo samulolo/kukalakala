@@ -48,7 +48,8 @@ async function fetchWithAuth<T>(path: string, token?: string): Promise<T | null>
 
 export default async function NewApplicationPage({ searchParams }: Props) {
   const job = searchParams.job_id ? await getJobById(searchParams.job_id).catch(() => null) : null;
-  const token = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("kukalakala_session")?.value;
   const candidate = await fetchWithAuth<AuthCandidate>("/api/v1/candidate-auth/me", token);
   const profile = candidate
     ? await fetchWithAuth<ApiCandidateProfile>(`/api/v1/candidate-profile/${candidate.id}`, token)

@@ -104,7 +104,8 @@ function buildJobPerformance(jobs: DashboardJob[], applications: DashboardApplic
 }
 
 export default async function DashboardMetricsPage() {
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const [jobsData, applicationsData] = await Promise.all([
     getDashboardJobs({ page: "1", limit: "100", authToken }),
     getDashboardApplications({ page: "1", limit: "100", authToken }),

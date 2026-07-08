@@ -10,7 +10,8 @@ import { getDashboardOverview } from "@/lib/dashboard-api";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const authToken = cookies().get("kukalakala_session")?.value;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("kukalakala_session")?.value;
   const overview = await getDashboardOverview(authToken);
 
   return (
