@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/auth-api";
 import { saveAuthSession } from "@/lib/auth/auth-session";
 import { getSafeRedirectPath } from "@/lib/auth/auth-redirect";
 import { verifyPassword } from "@/utils/util";
+import { supabase } from "@/supabase/lib";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -47,20 +48,40 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      const response = type === "company"
-        ? await registerCompany({
-            name,
-            email,
-            password,
-            sector,
-            location,
-            foundation_date: foundationDate || null,
-          })
-        : await register({ name, email, password });
-      saveAuthSession(response.data, type);
-      setSuccessMessage("Conta criada com sucesso. A abrir a tua dashboard...");
-      const redirectTo = new URLSearchParams(window.location.search).get("redirect");
-      router.replace(getSafeRedirectPath(response.data, redirectTo, type));
+
+      const options = type === 'candidate' ? {name: name} :
+       {sector: sector, location : location, foundation_data : foundationDate, name : name}
+
+      const {error, data} = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            ...options
+          }
+        }
+      })
+
+      if (error){
+        console.log("Houve um erro ao criar utilizador")
+        return
+      }
+      console.log("Dados Utilizador logado: ", data)
+      console.log("Houve")
+      // const response = type === "company"
+      //   ? await registerCompany({
+      //       name,
+      //       email,
+      //       password,
+      //       sector,
+      //       location,
+      //       foundation_date: foundationDate || null,
+      //     })
+      //   : await register({ name, email, password });
+      // saveAuthSession(response.data, type);
+      // setSuccessMessage("Conta criada com sucesso. A abrir a tua dashboard...");
+      // const redirectTo = new URLSearchParams(window.location.search).get("redirect");
+      // router.replace(getSafeRedirectPath(response.data, redirectTo, type));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Não foi possível criar a conta";
       setErrorMessage(message);
