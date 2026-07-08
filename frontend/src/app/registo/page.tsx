@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-api";
 import { saveAuthSession } from "@/lib/auth/auth-session";
 import { getSafeRedirectPath } from "@/lib/auth/auth-redirect";
+import { verifyPassword } from "@/utils/util";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,8 +39,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setErrorMessage("A palavra-passe deve ter pelo menos 8 caracteres.");
+    if (!verifyPassword(password)) {
+      setErrorMessage("A palavra-passe deve ter pelo menos 8 caracteres, 1 letra maiuscula, 1 letra minuscula, 1 número e 1 caractere especial dessa lista [@*#$%&]");
       return;
     }
 
@@ -70,7 +71,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f6f8] px-4 py-12">
-      {/* Logo */}
+ 
       <a href="/" className="mb-8 flex items-center gap-2">
         <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-[0.72rem] font-black text-white">
           K
@@ -80,7 +81,6 @@ export default function RegisterPage() {
         </span>
       </a>
 
-      {/* Card */}
       <div className="w-full max-w-[420px] rounded-2xl border border-[#e4e7ec] bg-white p-8 shadow-[0_2px_16px_rgba(15,23,42,0.06)]">
         <h1 className="font-display text-[1.45rem] font-bold tracking-tight text-[#0f172a]">
           Criar conta
