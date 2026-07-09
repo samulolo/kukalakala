@@ -56,6 +56,7 @@ export default function RegisterPage() {
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/mail-confirmation/success?type=${type}`,
           data: {
             account_type: type,
             ...options
