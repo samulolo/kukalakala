@@ -52,22 +52,33 @@ export default function RegisterPage() {
       const options = type === 'candidate' ? {name: name} :
        {sector: sector, location : location, foundation_data : foundationDate, name : name}
 
-      const {error, data} = await supabase.auth.signUp({
-        email: email,
-        password: password,
+      const { error, data } = await supabase.auth.signUp({
+        email,
+        password,
         options: {
           data: {
+            account_type: type,
             ...options
           }
         }
       })
 
-      if (error){
-        console.log("Houve um erro ao criar utilizador")
+      if (error) {
+        setErrorMessage(error.message || "Não foi possível criar a conta. Tenta novamente.");
         return
       }
-      console.log("Dados Utilizador logado: ", data)
-      console.log("Houve")
+
+      if (!data.session || !data.user?.email_confirmed_at) {
+        const params = new URLSearchParams({
+          email,
+          type,
+        });
+
+        router.replace(`/mail-confirmation?${params.toString()}`);
+        return;
+      }
+
+      setSuccessMessage("Conta criada com sucesso. A abrir a tua dashboard...");
       // const response = type === "company"
       //   ? await registerCompany({
       //       name,
