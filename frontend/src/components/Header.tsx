@@ -74,7 +74,7 @@ export function Header() {
         )}
         <a
           href={authState.isAuthenticated ? authState.dashboardPath : "/dashboard"}
-          className="hidden h-10 items-center justify-center rounded-xl bg-[#0f172a] px-5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-[#1e293b] sm:inline-flex"
+          className={`${authState.isAuthenticated ? "inline-flex" : "hidden sm:inline-flex"} h-10 items-center justify-center rounded-xl bg-[#0f172a] px-4 text-[0.84rem] font-semibold text-white transition-colors hover:bg-[#1e293b] sm:px-5 sm:text-[0.875rem]`}
         >
           {authState.isAuthenticated ? "Dashboard" : "Publicar vaga"}
         </a>
