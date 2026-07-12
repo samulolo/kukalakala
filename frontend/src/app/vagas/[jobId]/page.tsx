@@ -14,9 +14,9 @@ import { getJobById, getJobTypeLabel, getResponseTimeLabel } from "@/lib/jobs-ap
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: {
+  params: Promise<{
     jobId: string;
-  };
+  }>;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("pt-PT", {
@@ -40,7 +40,8 @@ function formatDate(dateValue: string | null | undefined) {
 }
 
 export default async function JobDetailsPage({ params }: Props) {
-  const job = await getJobById(params.jobId).catch(() => null);
+  const { jobId } = await params;
+  const job = await getJobById(jobId).catch(() => null);
 
   if (!job) {
     notFound();

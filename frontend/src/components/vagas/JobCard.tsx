@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowUpRight, BriefcaseBusiness, CalendarDays, Eye, MapPin } from "lucide-react";
 import { ApiJob, getJobTypeLabel, getResponseTimeLabel } from "@/lib/jobs-api";
 import { formatRelativeDate, getCompanyInitials } from "@/lib/vagas-utils";
@@ -85,13 +86,13 @@ export function JobCard({ job, featured = false }: Props) {
           </div>
 
           <div className="flex flex-shrink-0 flex-col gap-2.5 sm:min-w-[172px] sm:items-stretch">
-            <a
+            <Link
               href={detailsHref}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#dbe3ee] bg-[#f8fafc] px-5 font-display text-[0.88rem] font-semibold text-[#334155] transition-all hover:border-[#bfd0e5] hover:bg-white hover:text-accent hover:shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
             >
               <Eye size={15} aria-hidden="true" />
               Ver detalhes
-            </a>
+            </Link>
             <a
               href={applyHref}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-accent px-5 font-display text-[0.88rem] font-semibold text-white shadow-[0_12px_24px_rgba(37,87,167,0.18)] transition-all hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-[0_16px_30px_rgba(37,87,167,0.24)]"
