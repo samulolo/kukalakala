@@ -12,7 +12,8 @@ type Props = {
 export default async function MailConfirmationPage({ searchParams }: Props) {
   const params = await searchParams;
   const email = params?.email;
-  const accountType = params?.type === "company" ? "empresa" : "candidato";
+  const loginType = params?.type === "company" ? "company" : "candidate";
+  const accountType = loginType === "company" ? "empresa" : "candidato";
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#f5f6f8] px-4 py-12">
@@ -57,7 +58,7 @@ export default async function MailConfirmationPage({ searchParams }: Props) {
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/login"
+            href={`/login?type=${loginType}`}
             className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl bg-accent px-4 text-[0.88rem] font-semibold text-white transition hover:bg-accent-dark"
           >
             Ir para login

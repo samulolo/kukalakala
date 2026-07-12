@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Session, User } from "@supabase/supabase-js";
 import type { AuthSession } from "@/lib/auth/auth-api";
@@ -71,6 +71,14 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedType = params.get("type");
+
+    if (requestedType === "company" || requestedType === "candidate") {
+      setType(requestedType);
+    }
+  }, []);
 
   const handleLogin = async function(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault()
@@ -129,7 +137,7 @@ export default function LoginPage() {
       saveAuthSession(session, accountType)
       setSuccessMessage("Login feito com sucesso. Estamos a preparar o teu painel.")
       const redirectTo = new URLSearchParams(window.location.search).get("redirect")
-      window.location.assign(getSafeRedirectPath(session, redirectTo, accountType))
+      window.location.assign(accountType === "company" ? "/dashboard" : getSafeRedirectPath(session, redirectTo, accountType))
 
     } catch(error){
       setErrorMessage(getFriendlyErrorMessage(error, "Não conseguimos entrar agora. Confirma os dados e tenta novamente."))

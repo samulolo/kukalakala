@@ -5,6 +5,7 @@ const CANDIDATE_KEY = "kukalakala_candidate";
 const COMPANY_KEY = "kukalakala_company";
 const ROLE_KEY = "kukalakala_auth_role";
 const COOKIE_NAME = "kukalakala_session";
+const ROLE_COOKIE_NAME = "kukalakala_role";
 
 export type AuthRole = "candidate" | "company";
 
@@ -32,6 +33,7 @@ export function saveAuthSession(session: AuthSession, roleOverride?: AuthRole) {
   }
 
   document.cookie = `${COOKIE_NAME}=${session.access_token}; path=/; max-age=${session.expires_in}; SameSite=Lax`;
+  document.cookie = `${ROLE_COOKIE_NAME}=${role}; path=/; max-age=${session.expires_in}; SameSite=Lax`;
 }
 
 export function clearAuthSession() {
@@ -40,6 +42,7 @@ export function clearAuthSession() {
   localStorage.removeItem(COMPANY_KEY);
   localStorage.removeItem(ROLE_KEY);
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  document.cookie = `${ROLE_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
 }
 
 function getTokenPayload(token: string): { exp?: number } | null {

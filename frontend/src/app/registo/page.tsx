@@ -8,6 +8,8 @@ import { verifyPassword } from "@/utils/util";
 import { supabase } from "@/supabase/lib";
 import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
+const existingAccountMessage = "Já existe uma conta com este email. Inicia sessão ou usa outro email.";
+
 export default function RegisterPage() {
   const router = useRouter();
   const [show, setShow] = useState(false);
@@ -49,8 +51,10 @@ export default function RegisterPage() {
       const options = type === 'candidate' ? {name: name} :
        {sector: sector, location : location, foundation_data : foundationDate, name : name}
 
+      const normalizedEmail = email.trim().toLowerCase();
+
       const { error, data } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/mail-confirmation/success?type=${type}`,
@@ -66,9 +70,14 @@ export default function RegisterPage() {
         return
       }
 
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setErrorMessage(existingAccountMessage);
+        return;
+      }
+
       if (!data.session || !data.user?.email_confirmed_at) {
         const params = new URLSearchParams({
-          email,
+          email: normalizedEmail,
           type,
         });
 

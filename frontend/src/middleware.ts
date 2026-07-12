@@ -40,11 +40,16 @@ function getAccountType(payload: TokenPayload | null) {
   return null;
 }
 
+function getCookieAccountType(value?: string) {
+  return value === "candidate" || value === "company" ? value : null;
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const session = request.cookies.get("kukalakala_session")?.value;
+  const roleCookie = request.cookies.get("kukalakala_role")?.value;
   const payload = session ? getTokenPayload(session) : null;
-  const accountType = getAccountType(payload);
+  const accountType = getCookieAccountType(roleCookie) ?? getAccountType(payload);
   const hasValidSession = Boolean(
     payload &&
     typeof payload.exp === "number" &&

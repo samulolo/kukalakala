@@ -54,6 +54,15 @@ export function normalizeErrorMessage(message?: string | null, fallback = DEFAUL
     return "Email ou palavra-passe incorretos. Confirma os dados e tenta novamente.";
   }
 
+  if (
+    lowerMessage.includes("already registered") ||
+    lowerMessage.includes("already exists") ||
+    lowerMessage.includes("user already") ||
+    lowerMessage.includes("email already")
+  ) {
+    return "Já existe uma conta com este email. Inicia sessão ou usa outro email.";
+  }
+
   if (lowerMessage.includes("email not confirmed") || lowerMessage.includes("not confirmed")) {
     return "Ainda falta confirmar o email. Enviámos um link de confirmação para a tua caixa de entrada.";
   }
