@@ -55,14 +55,10 @@ class JobRepository:
 
     def list_public(self, offset : int, limit : int, current_date : datetime, type : JobType = None, q : str = None):
         query = select(Job).where(
-            Job.is_active == True,
-            Job.application_period_start <= current_date,
-            Job.application_period_end >= current_date
+            Job.is_active == True
         )
         count_query = select(func.count()).select_from(Job).where(
-            Job.is_active == True,
-            Job.application_period_start <= current_date,
-            Job.application_period_end >= current_date
+            Job.is_active == True
         )
 
         if type is not None:
