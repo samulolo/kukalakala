@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toast";
 import { getAuthToken, getStoredCompany, saveAuthSession } from "@/lib/auth/auth-session";
 import { getAuthenticatedCompany, updateCompany } from "@/lib/company-api";
 import type { AuthCompany } from "@/lib/auth/auth-api";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 const emptyCompany: AuthCompany = {
   id: "",
@@ -41,7 +42,7 @@ export function CompanyProfileForm() {
       .catch((error) => {
         toast({
           title: "Não foi possível carregar a empresa",
-          description: error instanceof Error ? error.message : "Inicia sessão novamente.",
+          description: getFriendlyErrorMessage(error, "Inicia sessão novamente."),
           variant: "error",
         });
       })
@@ -97,7 +98,7 @@ export function CompanyProfileForm() {
     } catch (error) {
       toast({
         title: "Não foi possível guardar",
-        description: error instanceof Error ? error.message : "Tenta novamente.",
+        description: getFriendlyErrorMessage(error, "Tenta novamente."),
         variant: "error",
       });
     } finally {

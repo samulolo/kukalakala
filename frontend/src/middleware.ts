@@ -5,6 +5,10 @@ type TokenPayload = {
   exp?: number;
   role?: string;
   sub?: string;
+  user_metadata?: {
+    account_type?: string;
+    role?: string;
+  };
 };
 
 function getTokenPayload(token: string): TokenPayload | null {
@@ -21,28 +25,44 @@ function getTokenPayload(token: string): TokenPayload | null {
   }
 }
 
+function getAccountType(payload: TokenPayload | null) {
+  const role = payload?.role;
+  const metadataRole = payload?.user_metadata?.account_type ?? payload?.user_metadata?.role;
+
+  if (role === "candidate" || role === "company") {
+    return role;
+  }
+
+  if (metadataRole === "candidate" || metadataRole === "company") {
+    return metadataRole;
+  }
+
+  return null;
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const session = request.cookies.get("kukalakala_session")?.value;
   const payload = session ? getTokenPayload(session) : null;
+  const accountType = getAccountType(payload);
   const hasValidSession = Boolean(
     payload &&
     typeof payload.exp === "number" &&
     payload.exp > Math.floor(Date.now() / 1000) &&
-    (payload.role === "candidate" || payload.role === "company")
+    accountType
   );
 
   if ((pathname === "/login" || pathname === "/registo") && hasValidSession) {
     const url = request.nextUrl.clone();
 
-    if (payload?.role === "company") {
+    if (accountType === "company") {
       url.pathname = "/dashboard";
       url.search = "";
       return NextResponse.redirect(url);
     }
 
     url.pathname = "/dashboard-candidato";
-    url.search = payload?.sub ? `?candidateId=${payload.sub}` : "";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
@@ -122,7 +142,7 @@ export function middleware(request: NextRequest) {
 
   if (
     hasValidSession &&
-    payload?.role === requiredRole
+    accountType === requiredRole
   ) {
     return NextResponse.next();
   }

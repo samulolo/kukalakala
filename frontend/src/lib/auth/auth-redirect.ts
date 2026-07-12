@@ -12,8 +12,7 @@ export function getDefaultDashboardPath(session: AuthSession, roleOverride?: Aut
     return "/dashboard";
   }
 
-  const candidateId = session.candidate?.id ?? session.user?.id;
-  return candidateId ? `/dashboard-candidato?candidateId=${candidateId}` : "/dashboard-candidato";
+  return "/dashboard-candidato";
 }
 
 export function getSafeRedirectPath(session: AuthSession, redirectTo: string | null, roleOverride?: AuthRole) {

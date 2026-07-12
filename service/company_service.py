@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from domain.company import Company
 from exception.app_exceptions import BadRequest, ResourceAlreadyExists, ResourceNotFound
@@ -22,6 +22,43 @@ class CompanyService:
             raise ResourceNotFound("Empresa não encontrada")
 
         return company
+
+    def get_by_email(self, email : str):
+        company = self.company_repository.get_by_email(email)
+
+        if not company:
+            raise ResourceNotFound("Empresa não encontrada")
+
+        return company
+
+    def get_or_create_from_auth(
+        self,
+        email : str,
+        name : str = None,
+        sector : str = None,
+        location : str = None,
+        foundation_date = None,
+    ):
+        company = self.company_repository.get_by_email(email)
+
+        if company:
+            return company
+
+        if isinstance(foundation_date, str):
+            try:
+                foundation_date = date.fromisoformat(foundation_date)
+            except ValueError:
+                foundation_date = None
+
+        new_company = Company(
+            name=name or email,
+            email=email,
+            sector=sector or "Não informado",
+            location=location or "Não informado",
+            foundation_date=foundation_date,
+        )
+
+        return self.company_repository.save(new_company)
 
     def _ensure_company_exists(self, email : str):
         return self.company_repository.get_by_email(email) is not None

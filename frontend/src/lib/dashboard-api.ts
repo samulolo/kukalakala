@@ -155,7 +155,7 @@ async function fetchApi<T>(path: string, authToken?: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${path}`);
+    throw new Error("Não foi possível carregar os dados agora.");
   }
 
   const payload = (await response.json()) as ApiResponse<T>;
@@ -385,7 +385,7 @@ export async function getDashboardJobs(query: { page?: string; limit?: string; s
     return {
       items: [] as DashboardJob[],
       pagination: { ...emptyPagination, page: Number(clampPage(query.page)), limit: Number(query.limit ?? "10") },
-      errorMessage: "Não foi possível carregar as vagas reais. Confirma se a API está em execução.",
+      errorMessage: "Não conseguimos carregar as vagas neste momento. Tenta novamente dentro de instantes.",
     };
   }
 }
@@ -449,7 +449,7 @@ export async function getDashboardApplications(query: { page?: string; limit?: s
     return {
       items: [] as DashboardApplication[],
       pagination: { ...emptyPagination, page, limit },
-      errorMessage: "Não foi possível carregar as candidaturas reais. Confirma se a API está em execução.",
+      errorMessage: "Não conseguimos carregar as candidaturas neste momento. Tenta novamente dentro de instantes.",
     };
   }
 }

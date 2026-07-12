@@ -25,10 +25,26 @@ def get_bearer_token(authorization : str = Header(None)) -> str:
     return authorization.split(" ", 1)[1].strip()
 
 
-def get_candidate_id_from_token(token : str) -> uuid.UUID:
-    payload = AuthTokenService().verify_access_token(token)
+def get_candidate_id_from_token(token : str, candidate_service : CandidateService = None) -> uuid.UUID:
+    payload = AuthTokenService().verify_any_access_token(token)
 
-    if not payload or payload.get("role") != "candidate":
+    if not payload:
+        raise BadRequest("Sessão inválida ou expirada")
+
+    if payload.get("provider") == "supabase":
+        if payload.get("role") and payload.get("role") != "candidate":
+            raise BadRequest("Sessão inválida ou expirada")
+
+        if not candidate_service or not payload.get("email") or not payload.get("email_confirmed"):
+            raise BadRequest("Sessão inválida ou expirada")
+
+        candidate = candidate_service.get_or_create_from_auth(
+            email=payload["email"],
+            name=payload.get("name"),
+        )
+        return candidate.id
+
+    if payload.get("role") != "candidate":
         raise BadRequest("Sessão inválida ou expirada")
 
     try:
@@ -65,7 +81,7 @@ def me(
     token : str = Depends(get_bearer_token),
     candidate_service : CandidateService = Depends(get_candidate_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     candidate = candidate_service.get_by_id(candidate_id)
     if not candidate:
         raise ResourceNotFound("Candidato não encontrado")
@@ -79,9 +95,10 @@ def me(
 @candidate_auth_controller.get("/me/messages", status_code=status.HTTP_200_OK, response_model=BaseResponse)
 def my_messages(
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     messages = application_service.list_candidate_messages(candidate_id)
 
     return success_response(
@@ -93,9 +110,10 @@ def my_messages(
 @candidate_auth_controller.get("/me/profile", status_code=status.HTTP_200_OK, response_model=BaseResponse)
 def my_profile(
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     profile = candidate_profile_service.get_by_id(candidate_id)
 
     return success_response(
@@ -110,9 +128,10 @@ def my_applications(
     limit : int = 10,
     status : ApplicationStatus = None,
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     applications = application_service.list(page, limit, candidate_id=candidate_id, status=status)
 
     return success_response(
@@ -125,9 +144,10 @@ def my_applications(
 def apply_to_job(
     job_id : uuid.UUID,
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     application = application_service.create(
         ApplicationCreate(
             candidate_id=candidate_id,

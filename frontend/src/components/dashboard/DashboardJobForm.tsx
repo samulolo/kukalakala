@@ -6,6 +6,7 @@ import { CalendarDays, Plus, Save } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { ApiJob } from "@/lib/jobs-api";
 import { getAuthToken } from "@/lib/auth/auth-session";
+import { getFriendlyErrorMessage, normalizeErrorMessage } from "@/lib/friendly-error";
 
 type Props = {
   mode: "create" | "edit";
@@ -37,7 +38,7 @@ function requirementsToArray(value: FormDataEntryValue | null) {
 async function getErrorMessage(response: Response) {
   try {
     const payload = (await response.json()) as ApiErrorResponse;
-    return payload.message || "Não foi possível guardar a vaga.";
+    return normalizeErrorMessage(payload.message, "Não foi possível guardar a vaga.");
   } catch {
     return "Não foi possível guardar a vaga.";
   }
@@ -106,7 +107,7 @@ export function DashboardJobForm({ mode, job }: Props) {
     } catch (error) {
       toast({
         title: "Não foi possível guardar",
-        description: error instanceof Error ? error.message : "Tenta novamente dentro de instantes.",
+        description: getFriendlyErrorMessage(error, "Tenta novamente dentro de instantes."),
         variant: "error",
       });
     } finally {

@@ -9,7 +9,7 @@ type Props = {
 
 export function StatsRow({ stats }: Props) {
   const items = [
-    { label: "Vagas ativas", value: String(stats.activeJobs), delta: "API", positive: true },
+    { label: "Vagas ativas", value: String(stats.activeJobs), delta: "Atual", positive: true },
     { label: "Candidaturas", value: String(stats.newApplicants), delta: "Total", positive: true },
     { label: "Entrevistas", value: String(stats.interviews), delta: "Status", positive: true },
     { label: "Score médio IA", value: `${stats.averageScore}%`, delta: "Match", positive: stats.averageScore >= 50 },

@@ -16,6 +16,7 @@ import {
 import { getAuthToken } from "@/lib/auth/auth-session";
 import { API_BASE_URL } from "@/lib/jobs-api";
 import { useToast } from "@/components/ui/toast";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 type Props = {
   jobId: string;
@@ -124,7 +125,7 @@ export function ApplicationConfirmationForm({ jobId, candidate, profile }: Props
     } catch (error) {
       toast({
         title: "Não foi possível candidatar",
-        description: error instanceof Error ? error.message : "Tenta novamente dentro de instantes.",
+        description: getFriendlyErrorMessage(error, "Tenta novamente dentro de instantes."),
         variant: "error",
       });
     } finally {

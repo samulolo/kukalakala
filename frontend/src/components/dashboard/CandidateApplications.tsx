@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/toast";
 import { getAuthToken } from "@/lib/auth/auth-session";
 import { DashboardApplication } from "@/lib/dashboard-api";
 import { Pagination } from "@/lib/jobs-api";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 type Props = {
   applications: DashboardApplication[];
@@ -242,12 +243,12 @@ export function CandidateApplications({ applications, pagination, status = "all"
       });
       router.refresh();
       return true;
-    } catch {
+    } catch (error) {
       setLocalApplications(previousApplications);
       setSelectedCandidate((current) => current?.id === application.id ? application : current);
       toast({
         title: "Não foi possível atualizar o status",
-        description: "Confirma se a API está em execução e tenta novamente.",
+        description: getFriendlyErrorMessage(error, "Não conseguimos atualizar esta candidatura agora. Tenta novamente dentro de instantes."),
         variant: "error",
       });
       return false;
@@ -520,7 +521,7 @@ export function CandidateApplications({ applications, pagination, status = "all"
               {localApplications.length === 0 ? "Nenhuma candidatura encontrada" : "Nenhum candidato corresponde à pesquisa"}
             </p>
             <p className="mt-1 text-[0.85rem] text-[#667085]">
-              {localApplications.length === 0 ? "Quando houver aplicações reais na API, elas aparecem aqui." : "Tenta pesquisar por nome, email, vaga ou etapa."}
+              {localApplications.length === 0 ? "Quando houver candidaturas, elas aparecem aqui." : "Tenta pesquisar por nome, email, vaga ou etapa."}
             </p>
           </div>
         )}

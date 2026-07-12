@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, status
 
-from controller.dependencies import get_application_service
+from controller.dependencies import get_application_service, get_candidate_service, get_company_service
 from controller.auth.company_auth_controller import get_bearer_token, get_company_id_from_token
 from controller.auth.user_auth_controller import get_candidate_id_from_token
 from exception.app_exceptions import BadRequest
@@ -10,6 +10,8 @@ from domain.application import ApplicationStatus
 from schema.app_response import BaseResponse, success_response
 from schema.application import ApplicationCreate, ApplicationDecisionUpdate, ApplicationUpdate
 from service.application_service import ApplicationService
+from service.candidate_service import CandidateService
+from service.company_service import CompanyService
 
 
 application_controller = APIRouter(prefix="/api/v1/application", tags=["application"])
@@ -23,17 +25,19 @@ def get_all(
     job_id : uuid.UUID = Query(None),
     status : ApplicationStatus = Query(None),
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
+    company_service : CompanyService = Depends(get_company_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
     try:
-        candidate_from_token = get_candidate_id_from_token(token)
+        candidate_from_token = get_candidate_id_from_token(token, candidate_service)
         if candidate_id is None:
             candidate_id = candidate_from_token
         elif candidate_id != candidate_from_token:
             raise BadRequest("Esta candidatura não pertence ao candidato autenticado")
         applications = application_service.list(page, limit, candidate_id, job_id, status)
     except BadRequest:
-        company_id = get_company_id_from_token(token)
+        company_id = get_company_id_from_token(token, company_service)
         if not job_id:
             raise BadRequest("Informe a vaga para listar candidaturas da empresa")
         applications = application_service.list_for_company_job(page, limit, job_id=job_id, company_id=company_id, status=status)
@@ -51,9 +55,10 @@ def get_by_candidate(
     limit : int = Query(10, ge=1, le=100),
     status : ApplicationStatus = Query(None),
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    candidate_from_token = get_candidate_id_from_token(token)
+    candidate_from_token = get_candidate_id_from_token(token, candidate_service)
     if candidate_from_token != candidate_id:
         raise BadRequest("Esta candidatura não pertence ao candidato autenticado")
 
@@ -71,9 +76,10 @@ def get_by_job(
     limit : int = Query(10, ge=1, le=100),
     status : ApplicationStatus = Query(None),
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     applications = application_service.list_for_company_job(page, limit, job_id=job_id, company_id=company_id, status=status)
     return success_response(
         data=applications,
@@ -94,9 +100,10 @@ def get(application_id : uuid.UUID, application_service : ApplicationService = D
 def get_messages(
     application_id : uuid.UUID,
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     messages = application_service.list_messages_for_company(application_id, company_id)
     return success_response(
         data=messages,
@@ -108,9 +115,10 @@ def get_messages(
 def create(
     application_create : ApplicationCreate,
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     if candidate_id != application_create.candidate_id:
         raise BadRequest("Esta candidatura não pertence ao candidato autenticado")
 
@@ -136,9 +144,10 @@ def company_decision(
     application_id : uuid.UUID,
     application_decision : ApplicationDecisionUpdate,
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     application_service : ApplicationService = Depends(get_application_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     application = application_service.update_company_decision(
         application_id=application_id,
         company_id=company_id,

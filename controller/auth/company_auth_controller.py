@@ -24,10 +24,29 @@ def get_bearer_token(authorization : str = Header(None)) -> str:
     return authorization.split(" ", 1)[1].strip()
 
 
-def get_company_id_from_token(token : str) -> uuid.UUID:
-    payload = AuthTokenService().verify_access_token(token)
+def get_company_id_from_token(token : str, company_service : CompanyService = None) -> uuid.UUID:
+    payload = AuthTokenService().verify_any_access_token(token)
 
-    if not payload or payload.get("role") != "company":
+    if not payload:
+        raise BadRequest("Sessão inválida ou expirada")
+
+    if payload.get("provider") == "supabase":
+        if payload.get("role") and payload.get("role") != "company":
+            raise BadRequest("Sessão inválida ou expirada")
+
+        if not company_service or not payload.get("email") or not payload.get("email_confirmed"):
+            raise BadRequest("Sessão inválida ou expirada")
+
+        company = company_service.get_or_create_from_auth(
+            email=payload["email"],
+            name=payload.get("name"),
+            sector=payload.get("sector"),
+            location=payload.get("location"),
+            foundation_date=payload.get("foundation_date"),
+        )
+        return company.id
+
+    if payload.get("role") != "company":
         raise BadRequest("Sessão inválida ou expirada")
 
     try:
@@ -64,7 +83,7 @@ def me(
     token : str = Depends(get_bearer_token),
     company_service : CompanyService = Depends(get_company_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     company = company_service.get_by_id(company_id)
 
     return success_response(
@@ -77,9 +96,10 @@ def me(
 def create_job_for_authenticated_company(
     job_create : JobCreateWithoutCompany,
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     job_service : JobService = Depends(get_job_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     job = job_service.create(job_create.to_job_create(company_id))
 
     return success_response(
@@ -97,9 +117,10 @@ def list_jobs_for_authenticated_company(
     type : JobType = Query(None),
     q : str = Query(None),
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     job_service : JobService = Depends(get_job_service),
 ) -> BaseResponse:
-    company_id = get_company_id_from_token(token)
+    company_id = get_company_id_from_token(token, company_service)
     jobs = job_service.list(page, limit, company_id=company_id, is_active=is_active, type=type, q=q)
 
     return success_response(

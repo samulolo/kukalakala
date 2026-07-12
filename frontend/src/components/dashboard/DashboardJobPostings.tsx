@@ -55,7 +55,7 @@ export function DashboardJobPostings({ jobs, pagination, status = "all", errorMe
     router.push(`/dashboard/vagas?${params.toString()}`);
     toast({
       title: nextStatus === "all" ? "Todas as vagas" : `Filtro ${nextStatus === "active" ? "ativas" : "inativas"} aplicado`,
-      description: "A lista foi atualizada com dados reais da API.",
+      description: "A lista foi atualizada com os dados mais recentes.",
       variant: "info",
     });
   }
@@ -144,7 +144,7 @@ export function DashboardJobPostings({ jobs, pagination, status = "all", errorMe
       {jobs.length === 0 && (
         <div className="py-10 text-center">
           <p className="text-[0.95rem] font-semibold text-[#0f172a]">Nenhuma vaga encontrada</p>
-          <p className="mt-1 text-[0.85rem] text-[#667085]">Quando houver vagas na API, elas aparecem aqui.</p>
+          <p className="mt-1 text-[0.85rem] text-[#667085]">Quando houver vagas publicadas, elas aparecem aqui.</p>
         </div>
       )}
 

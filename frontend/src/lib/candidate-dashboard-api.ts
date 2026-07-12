@@ -104,7 +104,7 @@ async function fetchApi<T>(path: string, authToken?: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${path}`);
+    throw new Error("Não foi possível carregar os dados agora.");
   }
 
   const payload = (await response.json()) as ApiResponse<T>;
@@ -212,7 +212,7 @@ export async function getCandidateDashboardData(query: { candidateId?: string; p
     const page = Number.parseInt(query.page ?? "1", 10);
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
     const [profile, applicationsData] = await Promise.all([
-      getCandidateProfile(candidate.id, query.authToken),
+      getCandidateProfile(candidate.id, query.authToken).catch(() => null),
       fetchApi<Paginated<ApiApplication>>(`/api/v1/candidate-auth/me/applications?page=${safePage}&limit=10`, query.authToken),
     ]);
     const messages = await fetchApi<ApiApplicationMessage[]>("/api/v1/candidate-auth/me/messages", query.authToken).catch(() => []);
@@ -241,7 +241,7 @@ export async function getCandidateDashboardData(query: { candidateId?: string; p
       applications: [],
       pagination: emptyPagination,
       stats: { total: 0, interviews: 0, approved: 0, averageScore: 0 },
-      errorMessage: "Não foi possível carregar a dashboard do candidato. Confirma se a API está em execução.",
+      errorMessage: "Não conseguimos carregar o teu painel neste momento. Tenta novamente dentro de instantes.",
     };
   }
 }

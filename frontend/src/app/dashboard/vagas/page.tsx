@@ -30,7 +30,7 @@ export default async function DashboardJobsPage({ searchParams }: Props) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="font-display text-[1.65rem] font-semibold text-[#0f172a]">Vagas</h1>
-          <p className="mt-1 text-[0.9rem] text-[#667085]">Gere vagas reais publicadas na API.</p>
+          <p className="mt-1 text-[0.9rem] text-[#667085]">Gere vagas publicadas pela sua empresa.</p>
         </div>
         <Link href="/dashboard/vagas/nova" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-accent px-4 text-[0.85rem] font-semibold text-white shadow-[0_4px_14px_rgba(23,163,74,0.3)] hover:bg-accent-dark">
           <Plus size={16} aria-hidden="true" />

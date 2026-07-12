@@ -22,7 +22,7 @@ def get_all(
     token : str = Depends(get_bearer_token),
     company_service : CompanyService = Depends(get_company_service),
 ) -> BaseResponse:
-    get_company_id_from_token(token)
+    get_company_id_from_token(token, company_service)
     companies = company_service.list(page, limit)
     return success_response(
         data=companies,
@@ -39,9 +39,10 @@ def get_jobs(
     type : JobType = Query(None),
     q : str = Query(None),
     token : str = Depends(get_bearer_token),
+    company_service : CompanyService = Depends(get_company_service),
     job_service : JobService = Depends(get_job_service),
 ) -> BaseResponse:
-    authenticated_company_id = get_company_id_from_token(token)
+    authenticated_company_id = get_company_id_from_token(token, company_service)
     if authenticated_company_id != company_id:
         raise BadRequest("Esta empresa não pertence à sessão autenticada")
 
@@ -58,7 +59,7 @@ def get(
     token : str = Depends(get_bearer_token),
     company_service : CompanyService = Depends(get_company_service),
 ) -> BaseResponse:
-    authenticated_company_id = get_company_id_from_token(token)
+    authenticated_company_id = get_company_id_from_token(token, company_service)
     if authenticated_company_id != company_id:
         raise BadRequest("Esta empresa não pertence à sessão autenticada")
 
@@ -86,7 +87,7 @@ def update(
     token : str = Depends(get_bearer_token),
     company_service : CompanyService = Depends(get_company_service),
 ) -> BaseResponse:
-    authenticated_company_id = get_company_id_from_token(token)
+    authenticated_company_id = get_company_id_from_token(token, company_service)
     if authenticated_company_id != company_id:
         raise BadRequest("Esta empresa não pertence à sessão autenticada")
 
@@ -103,7 +104,7 @@ def delete(
     token : str = Depends(get_bearer_token),
     company_service : CompanyService = Depends(get_company_service),
 ) -> BaseResponse:
-    authenticated_company_id = get_company_id_from_token(token)
+    authenticated_company_id = get_company_id_from_token(token, company_service)
     if authenticated_company_id != company_id:
         raise BadRequest("Esta empresa não pertence à sessão autenticada")
 

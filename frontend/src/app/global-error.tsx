@@ -1,5 +1,7 @@
 "use client";
 
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
+
 type Props = {
   error: Error & { digest?: string };
   reset: () => void;
@@ -52,7 +54,7 @@ export default function GlobalError({ error, reset }: Props) {
               fontSize: "14px",
               lineHeight: 1.6,
             }}>
-              {error.message || "Tenta atualizar a página ou voltar a abrir a aplicação."}
+              {getFriendlyErrorMessage(error, "Tenta atualizar a página ou voltar a abrir a aplicação.")}
             </p>
             <button
               type="button"

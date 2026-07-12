@@ -11,6 +11,7 @@ import {
 } from "@/lib/candidate-profile-api";
 import type { CandidateProfilePayload } from "@/lib/candidate-profile-api";
 import { useToast } from "@/components/ui/toast";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 type Props = {
   candidateId?: string;
@@ -88,7 +89,7 @@ export function CandidateProfilePanel({ candidateId, profile }: Props) {
     } catch (error) {
       toast({
         title: "Não foi possível guardar",
-        description: error instanceof Error ? error.message : "Tenta novamente.",
+        description: getFriendlyErrorMessage(error, "Tenta novamente."),
         variant: "error",
       });
     } finally {
@@ -135,7 +136,7 @@ export function CandidateProfilePanel({ candidateId, profile }: Props) {
     } catch (error) {
       toast({
         title: "Não foi possível carregar o CV",
-        description: error instanceof Error ? error.message : "Tenta novamente com outro PDF.",
+        description: getFriendlyErrorMessage(error, "Tenta novamente com outro PDF."),
         variant: "error",
       });
     } finally {

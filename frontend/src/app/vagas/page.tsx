@@ -7,6 +7,7 @@ import { JobsHeader } from "@/components/vagas/JobsHeader";
 import { ActiveFilters } from "@/components/vagas/ActiveFilters";
 import { JobsPagination } from "@/components/vagas/JobsPagination";
 import { getPublicJobs, JobsQuery } from "@/lib/jobs-api";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +19,7 @@ export default async function JobsPage({ searchParams }: Props) {
   const result = await getPublicJobs(searchParams).catch((error) => ({
     items: [],
     pagination: { page: 1, limit: 5, total: 0, pages: 0 },
-    errorMessage:
-      error instanceof Error ? error.message : "Check if the API is running and try again.",
+    errorMessage: getFriendlyErrorMessage(error, "Não conseguimos carregar as vagas agora. Tenta novamente dentro de instantes."),
   }));
   const requestedPage = Number(searchParams.page ?? "1");
 

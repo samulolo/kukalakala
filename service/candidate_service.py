@@ -38,6 +38,27 @@ class CandidateService:
 
         return candidate
 
+    def get_by_email(self, email : str):
+        candidate = self.candidate_repository.get_by_email(email)
+
+        if not candidate:
+            raise ResourceNotFound("Candidato não encontrado")
+
+        return candidate
+
+    def get_or_create_from_auth(self, email : str, name : str = None):
+        candidate = self.candidate_repository.get_by_email(email)
+
+        if candidate:
+            return candidate
+
+        return self.candidate_repository.save(
+            Candidate(
+                name=name or email,
+                email=email,
+            )
+        )
+
 
     def create(self, candidate_create : CandidateCreate):
 

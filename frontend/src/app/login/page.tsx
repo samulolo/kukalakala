@@ -4,10 +4,62 @@ import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth/auth-api";
+import type { Session, User } from "@supabase/supabase-js";
+import type { AuthSession } from "@/lib/auth/auth-api";
 import Input from "@/components/ui/Input";
 import { saveAuthSession } from "@/lib/auth/auth-session";
 import { getSafeRedirectPath } from "@/lib/auth/auth-redirect";
+import { supabase } from "@/supabase/lib";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
+
+type AccountType = "candidate" | "company";
+
+function getMetadataValue(user: User, key: string) {
+  const value = user.user_metadata?.[key];
+  return typeof value === "string" ? value : "";
+}
+
+function getAccountType(user: User, fallback: AccountType): AccountType {
+  const accountType = getMetadataValue(user, "account_type");
+  return accountType === "company" || accountType === "candidate" ? accountType : fallback;
+}
+
+function isEmailConfirmed(user: User) {
+  return Boolean(user.email_confirmed_at || user.confirmed_at);
+}
+
+function buildSupabaseAuthSession(session: Session, user: User, role: AccountType): AuthSession {
+  const baseUser = {
+    id: user.id,
+    name: getMetadataValue(user, "name") || user.email || "Utilizador",
+    email: user.email || "",
+  };
+
+  if (role === "company") {
+    const company = {
+      ...baseUser,
+      sector: getMetadataValue(user, "sector"),
+      location: getMetadataValue(user, "location"),
+      foundation_date: getMetadataValue(user, "foundation_date") || getMetadataValue(user, "foundation_data") || null,
+    };
+
+    return {
+      company,
+      user: company,
+      access_token: session.access_token,
+      token_type: "Bearer",
+      expires_in: session.expires_in ?? 3600,
+    };
+  }
+
+  return {
+    candidate: baseUser,
+    user: baseUser,
+    access_token: session.access_token,
+    token_type: "Bearer",
+    expires_in: session.expires_in ?? 3600,
+  };
+}
 
 export default function LoginPage() {
   const [show, setShow] = useState(false);
@@ -17,7 +69,6 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const {login, loginCompany} = useAuth()
   const router = useRouter()
 
 
@@ -34,22 +85,54 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      const response = type === "company"
-        ? await loginCompany({email, password})
-        : await login({email, password})
-      saveAuthSession(response.data, type)
+      if (error) {
+        const errorText = error.message.toLowerCase();
+
+        if (errorText.includes("email not confirmed") || errorText.includes("not confirmed")) {
+          const params = new URLSearchParams({ email, type });
+          router.replace(`/mail-confirmation?${params.toString()}`);
+          return;
+        }
+
+        throw new Error(getFriendlyErrorMessage(error, "Não conseguimos entrar agora. Confirma os dados e tenta novamente."));
+      }
+
+      if (!data.session || !data.user) {
+        throw new Error("Não foi possível iniciar sessão. Tenta novamente.");
+      }
+
+      if (!isEmailConfirmed(data.user)) {
+        await supabase.auth.signOut();
+        const params = new URLSearchParams({ email, type });
+        router.replace(`/mail-confirmation?${params.toString()}`);
+        return;
+      }
+
+      const accountType = getAccountType(data.user, type);
+
+      if (accountType !== type) {
+        await supabase.auth.signOut();
+        setErrorMessage(
+          accountType === "company"
+            ? "Esta conta está registada como empresa. Troca o perfil para Empresa e tenta novamente."
+            : "Esta conta está registada como candidato. Troca o perfil para Candidato e tenta novamente."
+        );
+        return;
+      }
+
+      const session = buildSupabaseAuthSession(data.session, data.user, accountType);
+      saveAuthSession(session, accountType)
       setSuccessMessage("Login feito com sucesso. Estamos a preparar o teu painel.")
       const redirectTo = new URLSearchParams(window.location.search).get("redirect")
-      router.replace(getSafeRedirectPath(response.data, redirectTo, type))
+      window.location.assign(getSafeRedirectPath(session, redirectTo, accountType))
 
     } catch(error){
-      const message = error instanceof Error ? error.message : "Não foi possível fazer login."
-      setErrorMessage(
-        message === "Candidato não encontrado"
-          ? "Não encontramos uma conta com esse email. Confirma o endereço ou cria uma conta nova."
-          : message
-      )
+      setErrorMessage(getFriendlyErrorMessage(error, "Não conseguimos entrar agora. Confirma os dados e tenta novamente."))
     } finally {
       setIsSubmitting(false)
     }

@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/lib/jobs-api";
 import type { ApiCandidateProfile } from "@/lib/candidate-dashboard-api";
 import { getAuthToken } from "@/lib/auth/auth-session";
+import { normalizeErrorMessage } from "@/lib/friendly-error";
 
 const CLIENT_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? API_BASE_URL;
 
@@ -41,7 +42,7 @@ async function getErrorMessage(response: Response, fallback: string) {
   try {
     const payload = (await response.json()) as ApiErrorResponse;
     const validationMessage = payload.data?.[0]?.msg?.replace("Value error, ", "");
-    return validationMessage || payload.message || fallback;
+    return normalizeErrorMessage(validationMessage || payload.message, fallback);
   } catch {
     return fallback;
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 type Props = {
   error: Error & { digest?: string };
@@ -14,7 +15,7 @@ export default function ErrorPage({ error, reset }: Props) {
         <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#ef4444]">Erro inesperado</p>
         <h1 className="mt-2 font-display text-[1.4rem] font-semibold text-[#0f172a]">Não foi possível carregar esta página</h1>
         <p className="mt-2 text-[0.88rem] leading-relaxed text-[#667085]">
-          {error.message || "Tenta atualizar a página ou voltar ao início."}
+          {getFriendlyErrorMessage(error, "Tenta atualizar a página ou voltar ao início.")}
         </p>
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <button

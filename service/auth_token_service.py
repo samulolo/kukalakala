@@ -5,6 +5,8 @@ import json
 import time
 from typing import Any
 
+import requests
+
 from core.setting import get_settings
 
 
@@ -57,6 +59,42 @@ class AuthTokenService:
             return None
 
         return payload
+
+    def verify_any_access_token(self, token: str) -> dict[str, Any] | None:
+        return self.verify_access_token(token) or self.verify_supabase_access_token(token)
+
+    def verify_supabase_access_token(self, token: str) -> dict[str, Any] | None:
+        if not self.settings.supabase_url or not self.settings.supabase_key:
+            return None
+
+        try:
+            response = requests.get(
+                f"{self.settings.supabase_url.rstrip('/')}/auth/v1/user",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "apikey": self.settings.supabase_key,
+                },
+                timeout=10,
+            )
+            response.raise_for_status()
+            user = response.json()
+        except (requests.RequestException, ValueError):
+            return None
+
+        email_confirmed = bool(user.get("email_confirmed_at") or user.get("confirmed_at"))
+        metadata = user.get("user_metadata") or {}
+
+        return {
+            "sub": user.get("id"),
+            "email": user.get("email"),
+            "name": metadata.get("name") or user.get("email"),
+            "sector": metadata.get("sector"),
+            "location": metadata.get("location"),
+            "foundation_date": metadata.get("foundation_date") or metadata.get("foundation_data"),
+            "role": metadata.get("account_type") or metadata.get("role"),
+            "provider": "supabase",
+            "email_confirmed": email_confirmed,
+        }
 
     def _encode(self, payload: dict[str, Any]) -> str:
         header = {"alg": "HS256", "typ": "JWT"}

@@ -4,15 +4,12 @@ import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, User, Building2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth/auth-api";
-import { saveAuthSession } from "@/lib/auth/auth-session";
-import { getSafeRedirectPath } from "@/lib/auth/auth-redirect";
 import { verifyPassword } from "@/utils/util";
 import { supabase } from "@/supabase/lib";
+import { getFriendlyErrorMessage } from "@/lib/friendly-error";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, registerCompany } = useAuth();
   const [show, setShow] = useState(false);
   const [type, setType] = useState<"candidate" | "company">("candidate");
   const [name, setName] = useState("");
@@ -65,7 +62,7 @@ export default function RegisterPage() {
       })
 
       if (error) {
-        setErrorMessage(error.message || "Não foi possível criar a conta. Tenta novamente.");
+        setErrorMessage(getFriendlyErrorMessage(error, "Não foi possível criar a conta. Tenta novamente."));
         return
       }
 
@@ -95,8 +92,7 @@ export default function RegisterPage() {
       // const redirectTo = new URLSearchParams(window.location.search).get("redirect");
       // router.replace(getSafeRedirectPath(response.data, redirectTo, type));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Não foi possível criar a conta";
-      setErrorMessage(message);
+      setErrorMessage(getFriendlyErrorMessage(error, "Não foi possível criar a conta. Tenta novamente."));
     } finally {
       setIsSubmitting(false);
     }

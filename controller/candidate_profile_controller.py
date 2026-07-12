@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, File, Query, status, UploadFile
 
-from controller.dependencies import get_application_service, get_candidate_profile_service
+from controller.dependencies import get_application_service, get_candidate_profile_service, get_candidate_service, get_company_service
 from controller.auth.company_auth_controller import get_bearer_token, get_company_id_from_token
 from controller.auth.user_auth_controller import get_candidate_id_from_token
 from exception.app_exceptions import BadRequest
@@ -10,6 +10,8 @@ from schema.app_response import BaseResponse, success_response
 from schema.candidate.candidate_profile import CreateCandidateProfile, UpdateCandidateProfile
 from service.candidate_profile_service import CandidateProfileService
 from service.application_service import ApplicationService
+from service.candidate_service import CandidateService
+from service.company_service import CompanyService
 
 
 profile_controller = APIRouter(prefix='/api/v1/candidate-profile', tags=['Candidate profile'])
@@ -19,8 +21,9 @@ profile_controller = APIRouter(prefix='/api/v1/candidate-profile', tags=['Candid
 def get_all(page : int = Query(1, ge=1),
             limit : int = Query(10, ge=1, le=100),
             token : str = Depends(get_bearer_token),
+            company_service : CompanyService = Depends(get_company_service),
             candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),) -> BaseResponse:
-    get_company_id_from_token(token)
+    get_company_id_from_token(token, company_service)
     candidate_profiles = candidate_profile_service.list(page, limit)
     return success_response(
         data=candidate_profiles,
@@ -31,14 +34,16 @@ def get_all(page : int = Query(1, ge=1),
 @profile_controller.get("/{candidate_id}", status_code=status.HTTP_200_OK, response_model=BaseResponse)
 def get(candidate_id : uuid.UUID,
          token : str = Depends(get_bearer_token),
+         candidate_service : CandidateService = Depends(get_candidate_service),
+         company_service : CompanyService = Depends(get_company_service),
          candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),
          application_service : ApplicationService = Depends(get_application_service),) -> BaseResponse:
     try:
-        authenticated_candidate_id = get_candidate_id_from_token(token)
+        authenticated_candidate_id = get_candidate_id_from_token(token, candidate_service)
         if authenticated_candidate_id != candidate_id:
             raise BadRequest("Este perfil não pertence à sessão autenticada")
     except BadRequest:
-        company_id = get_company_id_from_token(token)
+        company_id = get_company_id_from_token(token, company_service)
         if not application_service.candidate_has_application_for_company(candidate_id, company_id):
             raise BadRequest("Este perfil não pertence à empresa autenticada")
 
@@ -52,8 +57,9 @@ def get(candidate_id : uuid.UUID,
 @profile_controller.post("/", status_code=status.HTTP_201_CREATED, response_model=BaseResponse)
 def create(candidate_profile_create : CreateCandidateProfile,
             token : str = Depends(get_bearer_token),
+            candidate_service : CandidateService = Depends(get_candidate_service),
             candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),) -> BaseResponse:
-    candidate_id = get_candidate_id_from_token(token)
+    candidate_id = get_candidate_id_from_token(token, candidate_service)
     if candidate_id != candidate_profile_create.candidate_id:
         raise BadRequest("Este perfil não pertence à sessão autenticada")
 
@@ -70,9 +76,10 @@ def update(
     candidate_id : uuid.UUID,
     candidate_profile_update : UpdateCandidateProfile,
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),
 ) -> BaseResponse:
-    authenticated_candidate_id = get_candidate_id_from_token(token)
+    authenticated_candidate_id = get_candidate_id_from_token(token, candidate_service)
     if authenticated_candidate_id != candidate_id:
         raise BadRequest("Este perfil não pertence à sessão autenticada")
 
@@ -87,9 +94,10 @@ def update(
 def delete(
     candidate_id : uuid.UUID,
     token : str = Depends(get_bearer_token),
+    candidate_service : CandidateService = Depends(get_candidate_service),
     candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),
 ) -> BaseResponse:
-    authenticated_candidate_id = get_candidate_id_from_token(token)
+    authenticated_candidate_id = get_candidate_id_from_token(token, candidate_service)
     if authenticated_candidate_id != candidate_id:
         raise BadRequest("Este perfil não pertence à sessão autenticada")
 
@@ -101,8 +109,9 @@ def delete(
 async def upload_cv(candidate_id : uuid.UUID,
                     file : UploadFile = File(...),
                     token : str = Depends(get_bearer_token),
+                    candidate_service : CandidateService = Depends(get_candidate_service),
                     candidate_profile_service : CandidateProfileService = Depends(get_candidate_profile_service),) -> BaseResponse:
-    authenticated_candidate_id = get_candidate_id_from_token(token)
+    authenticated_candidate_id = get_candidate_id_from_token(token, candidate_service)
     if authenticated_candidate_id != candidate_id:
         raise BadRequest("Este perfil não pertence à sessão autenticada")
 
