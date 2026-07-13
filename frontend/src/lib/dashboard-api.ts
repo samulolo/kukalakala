@@ -122,7 +122,6 @@ export type DashboardApplication = {
 };
 
 export type DashboardOverview = {
-  company: ApiCompany | null;
   activeJobs: number;
   newApplicants: number;
   interviews: number;
@@ -148,10 +147,6 @@ const emptyPagination: Pagination = {
   total: 0,
   pages: 0,
 };
-
-export function isDashboardIdentityError(message?: string) {
-  return Boolean(message?.includes("identificar a empresa autenticada"));
-}
 
 async function fetchApi<T>(path: string, authToken?: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -460,8 +455,7 @@ export async function getDashboardApplications(query: { page?: string; limit?: s
 }
 
 export async function getDashboardOverview(authToken?: string): Promise<DashboardOverview> {
-  const [company, jobsData, applicationsData] = await Promise.all([
-    getAuthenticatedCompany(authToken),
+  const [jobsData, applicationsData] = await Promise.all([
     getDashboardJobs({ page: "1", limit: "4", status: "active", authToken }),
     getDashboardApplications({ page: "1", limit: "3", authToken }),
   ]);
@@ -472,7 +466,6 @@ export async function getDashboardOverview(authToken?: string): Promise<Dashboar
     : 0;
 
   return {
-    company,
     activeJobs: jobsData.pagination.total,
     newApplicants: allApplications.pagination.total,
     interviews: allApplications.items.filter((application) => application.stage === "entrevista").length,

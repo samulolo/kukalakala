@@ -55,13 +55,7 @@ export function JobsSection({ jobs = [], pagination, errorMessage }: JobsSection
                     ))}
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 md:items-end md:justify-end">
-                  <a
-                    className="inline-flex min-h-10 w-full items-center justify-center whitespace-nowrap rounded-lg border border-line bg-white px-4 text-[0.84rem] font-semibold text-[#475569] hover:border-accent hover:text-accent md:w-auto"
-                    href={`/vagas/detalhes?job_id=${job.id}`}
-                  >
-                    Ver detalhes
-                  </a>
+                <div className="md:flex md:justify-end">
                   <a
                     className="inline-flex min-h-10 w-full items-center justify-center whitespace-nowrap rounded-lg bg-[#0f172a] px-4 text-[0.84rem] font-semibold text-white hover:bg-[#1e293b] md:w-auto"
                     href={`/candidaturas/nova?job_id=${job.id}`}

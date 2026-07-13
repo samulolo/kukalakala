@@ -9,8 +9,7 @@ import {
   Search,
   Send,
 } from "lucide-react";
-import { DashboardAccessBlock } from "@/components/dashboard/DashboardAccessBlock";
-import { DashboardApplication, getDashboardApplications, isDashboardIdentityError } from "@/lib/dashboard-api";
+import { DashboardApplication, getDashboardApplications } from "@/lib/dashboard-api";
 
 export const dynamic = "force-dynamic";
 
@@ -104,10 +103,6 @@ export default async function DashboardMessagesPage({ searchParams }: Props) {
   const cookieStore = await cookies();
   const authToken = cookieStore.get("kukalakala_session")?.value;
   const applicationsData = await getDashboardApplications({ page: "1", limit: "100", authToken });
-  if (isDashboardIdentityError(applicationsData.errorMessage)) {
-    return <DashboardAccessBlock message={applicationsData.errorMessage} />;
-  }
-
   const feedbackApplications = applicationsData.items
     .filter(hasFeedback)
     .filter((application) => matchesSearch(application, search));

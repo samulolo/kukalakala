@@ -15,9 +15,7 @@ import {
   DashboardJob,
   getDashboardApplications,
   getDashboardJobs,
-  isDashboardIdentityError,
 } from "@/lib/dashboard-api";
-import { DashboardAccessBlock } from "@/components/dashboard/DashboardAccessBlock";
 
 export const dynamic = "force-dynamic";
 
@@ -112,11 +110,6 @@ export default async function DashboardMetricsPage() {
     getDashboardJobs({ page: "1", limit: "100", authToken }),
     getDashboardApplications({ page: "1", limit: "100", authToken }),
   ]);
-  const errorMessage = jobsData.errorMessage ?? applicationsData.errorMessage;
-
-  if (isDashboardIdentityError(errorMessage)) {
-    return <DashboardAccessBlock message={errorMessage} />;
-  }
 
   const jobs = jobsData.items;
   const applications = applicationsData.items;
@@ -197,9 +190,9 @@ export default async function DashboardMetricsPage() {
         </Link>
       </div>
 
-      {errorMessage && (
+      {(jobsData.errorMessage || applicationsData.errorMessage) && (
         <div className="rounded-lg border border-[#fecaca] bg-[#fff1f2] px-4 py-3 text-[0.85rem] font-medium text-[#b91c1c]">
-          {errorMessage}
+          {jobsData.errorMessage ?? applicationsData.errorMessage}
         </div>
       )}
 

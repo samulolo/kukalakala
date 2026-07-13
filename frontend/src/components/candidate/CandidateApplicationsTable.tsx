@@ -137,7 +137,7 @@ export function CandidateApplicationsTable({ applications, pagination, candidate
                     {application.messages.length > 0 ? <MessageSquareText size={14} aria-hidden="true" /> : <Sparkles size={14} aria-hidden="true" />}
                     {application.messages.length > 0 ? "Ver mensagem" : "Ver análise IA"}
                   </button>
-                  <Link href={`/vagas/detalhes?job_id=${application.jobId}`} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg border border-[#dbe3ee] px-3 text-[0.8rem] font-semibold text-[#475569] hover:border-accent hover:text-accent">
+                  <Link href={`/vagas/${application.jobId}`} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg border border-[#dbe3ee] px-3 text-[0.8rem] font-semibold text-[#475569] hover:border-accent hover:text-accent">
                     Ver vaga
                     <ArrowUpRight size={14} aria-hidden="true" />
                   </Link>
@@ -198,7 +198,7 @@ export function CandidateApplicationsTable({ applications, pagination, candidate
                           {application.messages.length > 0 ? <MessageSquareText size={14} aria-hidden="true" /> : <Sparkles size={14} aria-hidden="true" />}
                           {application.messages.length > 0 ? "Ver mensagem" : "Ver análise IA"}
                         </button>
-                        <Link href={`/vagas/detalhes?job_id=${application.jobId}`} className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-[#dbe3ee] px-3 text-[0.78rem] font-semibold text-[#475569] hover:border-accent hover:text-accent">
+                        <Link href={`/vagas/${application.jobId}`} className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-[#dbe3ee] px-3 text-[0.78rem] font-semibold text-[#475569] hover:border-accent hover:text-accent">
                           Ver vaga
                           <ArrowUpRight size={14} aria-hidden="true" />
                         </Link>
