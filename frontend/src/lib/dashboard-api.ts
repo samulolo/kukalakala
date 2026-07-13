@@ -122,6 +122,7 @@ export type DashboardApplication = {
 };
 
 export type DashboardOverview = {
+  company: ApiCompany | null;
   activeJobs: number;
   newApplicants: number;
   interviews: number;
@@ -455,7 +456,8 @@ export async function getDashboardApplications(query: { page?: string; limit?: s
 }
 
 export async function getDashboardOverview(authToken?: string): Promise<DashboardOverview> {
-  const [jobsData, applicationsData] = await Promise.all([
+  const [company, jobsData, applicationsData] = await Promise.all([
+    getAuthenticatedCompany(authToken),
     getDashboardJobs({ page: "1", limit: "4", status: "active", authToken }),
     getDashboardApplications({ page: "1", limit: "3", authToken }),
   ]);
@@ -466,6 +468,7 @@ export async function getDashboardOverview(authToken?: string): Promise<Dashboar
     : 0;
 
   return {
+    company,
     activeJobs: jobsData.pagination.total,
     newApplicants: allApplications.pagination.total,
     interviews: allApplications.items.filter((application) => application.stage === "entrevista").length,

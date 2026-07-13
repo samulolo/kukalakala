@@ -16,7 +16,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-5 p-6 sm:p-8">
-      <DashboardHeader />
+      <DashboardHeader companyName={overview.company?.name} />
       {overview.errorMessage && (
         <div className="rounded-lg border border-[#fecaca] bg-[#fff1f2] px-4 py-3 text-[0.85rem] font-medium text-[#b91c1c]">
           {overview.errorMessage}

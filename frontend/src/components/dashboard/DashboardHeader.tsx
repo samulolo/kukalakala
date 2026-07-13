@@ -1,11 +1,15 @@
 import { CalendarDays, Plus } from "lucide-react";
 
-export function DashboardHeader() {
+type Props = {
+  companyName?: string | null;
+};
+
+export function DashboardHeader({ companyName }: Props) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <div>
         <h1 className="font-display text-[1.65rem] font-semibold text-[#0f172a]">
-          Good morning, Maya
+          Good morning, {companyName ?? "empresa"}
         </h1>
         <p className="mt-1 text-[0.9rem] text-[#667085]">
           Here&apos;s what&apos;s happening with your roles today.
