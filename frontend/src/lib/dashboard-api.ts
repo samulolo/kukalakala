@@ -149,6 +149,10 @@ const emptyPagination: Pagination = {
   pages: 0,
 };
 
+export function isDashboardIdentityError(message?: string) {
+  return Boolean(message?.includes("identificar a empresa autenticada"));
+}
+
 async function fetchApi<T>(path: string, authToken?: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",

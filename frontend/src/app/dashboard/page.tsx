@@ -5,7 +5,8 @@ import { ApplicantsChart } from "@/components/dashboard/ApplicantsChart";
 import { HiringPipeline } from "@/components/dashboard/HiringPipeline";
 import { ActivePostings } from "@/components/dashboard/ActivePostings";
 import { RecentApplicants } from "@/components/dashboard/RecentApplicants";
-import { getDashboardOverview } from "@/lib/dashboard-api";
+import { DashboardAccessBlock } from "@/components/dashboard/DashboardAccessBlock";
+import { getDashboardOverview, isDashboardIdentityError } from "@/lib/dashboard-api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,10 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const authToken = cookieStore.get("kukalakala_session")?.value;
   const overview = await getDashboardOverview(authToken);
+
+  if (isDashboardIdentityError(overview.errorMessage)) {
+    return <DashboardAccessBlock message={overview.errorMessage} />;
+  }
 
   return (
     <div className="flex flex-col gap-5 p-6 sm:p-8">

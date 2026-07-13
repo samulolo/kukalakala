@@ -2,7 +2,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Plus } from "lucide-react";
 import { DashboardJobPostings } from "@/components/dashboard/DashboardJobPostings";
-import { getDashboardJobs } from "@/lib/dashboard-api";
+import { DashboardAccessBlock } from "@/components/dashboard/DashboardAccessBlock";
+import { getDashboardJobs, isDashboardIdentityError } from "@/lib/dashboard-api";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,10 @@ export default async function DashboardJobsPage({ searchParams }: Props) {
     status,
     authToken,
   });
+
+  if (isDashboardIdentityError(jobsData.errorMessage)) {
+    return <DashboardAccessBlock message={jobsData.errorMessage} />;
+  }
 
   return (
     <div className="flex flex-col gap-5 p-6 sm:p-8">

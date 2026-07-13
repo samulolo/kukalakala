@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { CandidateApplications } from "@/components/dashboard/CandidateApplications";
-import { getDashboardApplications } from "@/lib/dashboard-api";
+import { DashboardAccessBlock } from "@/components/dashboard/DashboardAccessBlock";
+import { getDashboardApplications, isDashboardIdentityError } from "@/lib/dashboard-api";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,10 @@ export default async function DashboardCandidatesPage({ searchParams }: Props) {
     status: params?.status,
     authToken,
   });
+
+  if (isDashboardIdentityError(applicationsData.errorMessage)) {
+    return <DashboardAccessBlock message={applicationsData.errorMessage} />;
+  }
 
   return (
     <div className="flex flex-col gap-5 p-6 sm:p-8">
