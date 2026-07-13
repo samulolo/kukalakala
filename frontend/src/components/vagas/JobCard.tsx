@@ -16,7 +16,7 @@ export function JobCard({ job, featured = false }: Props) {
   const location = job.company?.location ?? "Localização não informada";
 
   const applyHref = `/candidaturas/nova?job_id=${job.id}`;
-  const detailsHref = `/vagas/${job.id}`;
+  const detailsHref = `/vagas/detalhes?job_id=${job.id}`;
   const relativeDate = formatRelativeDate(job.created_at);
   const periodEnd = new Intl.DateTimeFormat("pt-PT", {
     day: "2-digit",

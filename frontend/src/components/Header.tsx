@@ -43,14 +43,14 @@ export function Header() {
 
   return (
     <nav
-      className="relative z-10 mx-auto flex min-h-[76px] w-[min(1180px,calc(100%-32px))] items-center justify-between gap-6"
+      className="relative z-10 mx-auto flex min-h-[76px] w-[min(1180px,calc(100%-32px))] items-center justify-between gap-3 sm:gap-6"
       aria-label="Navegação principal"
     >
       {/* Logo */}
       <a
         href="/"
         aria-label="Kukalakala - página inicial"
-        className="shrink-0 font-display text-[1.05rem] font-bold tracking-tight text-[#0f172a]"
+        className="min-w-0 shrink font-display text-[1rem] font-bold tracking-tight text-[#0f172a] sm:text-[1.05rem]"
       >
         kukalakala<span className="text-accent">.</span>
       </a>
@@ -63,7 +63,7 @@ export function Header() {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {authState.checked && !authState.isAuthenticated && (
           <a
             href="/login"
@@ -83,9 +83,10 @@ export function Header() {
             type="button"
             onClick={handleLogout}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#dbe3ee] px-3 text-[0.84rem] font-semibold text-[#374151] transition-colors hover:border-[#ef4444] hover:text-[#dc2626] sm:px-4 sm:text-[0.88rem]"
+            aria-label="Sair"
           >
             <LogOut size={15} aria-hidden="true" />
-            Sair
+            <span className="hidden sm:inline">Sair</span>
           </button>
         )}
       </div>

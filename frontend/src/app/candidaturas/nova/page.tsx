@@ -61,7 +61,7 @@ export default async function NewApplicationPage({ searchParams }: Props) {
     <div className="flex min-h-screen flex-col bg-[#f6f8fb]">
       <main className="mx-auto w-[min(1120px,calc(100%-32px))] flex-1 py-6 sm:py-8">
         <Link
-          href={job ? `/vagas/${job.id}` : "/vagas"}
+          href={job ? `/vagas/detalhes?job_id=${job.id}` : "/vagas"}
           className="inline-flex items-center gap-2 text-[0.88rem] font-semibold text-[#667085] hover:text-accent"
         >
           <ArrowLeft size={16} aria-hidden="true" />
