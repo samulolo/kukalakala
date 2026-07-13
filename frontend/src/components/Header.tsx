@@ -5,6 +5,28 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearAuthSession, getStoredDashboardPath, hasValidAuthSession } from "@/lib/auth/auth-session";
 
+function getCookieValue(name: string) {
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+}
+
+function getDashboardPathFromCookie() {
+  const role = getCookieValue("kukalakala_role");
+
+  if (role === "candidate") {
+    return "/dashboard-candidato";
+  }
+
+  if (role === "company") {
+    return "/dashboard";
+  }
+
+  return null;
+}
+
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
@@ -19,16 +41,31 @@ export function Header() {
   });
 
   useEffect(() => {
-    const isAuthenticated = hasValidAuthSession();
-    setAuthState({
-      checked: true,
-      isAuthenticated,
-      dashboardPath: isAuthenticated ? getStoredDashboardPath() : "/dashboard",
-    });
+    try {
+      const isAuthenticated = hasValidAuthSession() || Boolean(getCookieValue("kukalakala_session"));
+      const dashboardPath = getDashboardPathFromCookie() ?? getStoredDashboardPath();
+      setAuthState({
+        checked: true,
+        isAuthenticated,
+        dashboardPath: isAuthenticated ? dashboardPath : "/dashboard",
+      });
+    } catch {
+      const hasSessionCookie = Boolean(getCookieValue("kukalakala_session"));
+      setAuthState({
+        checked: true,
+        isAuthenticated: hasSessionCookie,
+        dashboardPath: hasSessionCookie ? getDashboardPathFromCookie() ?? "/dashboard" : "/dashboard",
+      });
+    }
   }, [pathname]);
 
   function handleLogout() {
-    clearAuthSession();
+    try {
+      clearAuthSession();
+    } catch {
+      document.cookie = "kukalakala_session=; path=/; max-age=0; SameSite=Lax";
+      document.cookie = "kukalakala_role=; path=/; max-age=0; SameSite=Lax";
+    }
     setAuthState({
       checked: true,
       isAuthenticated: false,
