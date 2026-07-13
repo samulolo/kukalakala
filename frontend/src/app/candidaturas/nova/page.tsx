@@ -17,9 +17,9 @@ type ApiResponse<T> = {
 };
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     job_id?: string;
-  };
+  }>;
 };
 
 async function fetchWithAuth<T>(path: string, token?: string): Promise<T | null> {
@@ -47,7 +47,8 @@ async function fetchWithAuth<T>(path: string, token?: string): Promise<T | null>
 }
 
 export default async function NewApplicationPage({ searchParams }: Props) {
-  const job = searchParams.job_id ? await getJobById(searchParams.job_id).catch(() => null) : null;
+  const { job_id: jobId = "" } = await searchParams;
+  const job = jobId ? await getJobById(jobId).catch(() => null) : null;
   const cookieStore = await cookies();
   const token = cookieStore.get("kukalakala_session")?.value;
   const candidate = await fetchWithAuth<AuthCandidate>("/api/v1/candidate-auth/me", token);
@@ -71,7 +72,7 @@ export default async function NewApplicationPage({ searchParams }: Props) {
         <section className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <ApplicationConfirmationForm
             candidate={candidate}
-            jobId={searchParams.job_id ?? ""}
+            jobId={jobId}
             profile={profile}
           />
 
