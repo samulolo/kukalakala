@@ -64,15 +64,15 @@ export function ApplicationConfirmationForm({ jobId, candidate, profile }: Props
   const loginHref = `/login?redirect=${encodeURIComponent(applyHref)}`;
   const hasProfile = Boolean(profile);
   const hasResume = Boolean(profile?.resume_url);
-  const canSubmit = Boolean(
-    candidate &&
-    jobId &&
-    name.trim() &&
-    email.trim() &&
-    experienceYears.trim() &&
-    parseCompetences(competences).length &&
-    (hasResume || resumeFile)
-  );
+  const missingRequirement =
+    !jobId ? "Não foi possível identificar a vaga selecionada." :
+    !name.trim() ? "Preenche o nome completo antes de submeter." :
+    !email.trim() ? "Preenche o email antes de submeter." :
+    !experienceYears.trim() ? "Indica os anos de experiência antes de submeter." :
+    parseCompetences(competences).length === 0 ? "Indica pelo menos uma competência chave." :
+    !hasResume && !resumeFile ? "Anexa um currículo em PDF antes de submeter." :
+    "";
+  const canSubmit = Boolean(candidate && !missingRequirement);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,7 +80,7 @@ export function ApplicationConfirmationForm({ jobId, candidate, profile }: Props
     if (!canSubmit) {
       toast({
         title: "Perfil incompleto",
-        description: "Completa o teu perfil e anexa o currículo antes de te candidatares.",
+        description: missingRequirement || "Completa o teu perfil antes de te candidatares.",
         variant: "error",
       });
       return;
@@ -256,7 +256,7 @@ export function ApplicationConfirmationForm({ jobId, candidate, profile }: Props
         </p>
         <button
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent px-5 text-[0.9rem] font-semibold text-white hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={!canSubmit || isSubmitting}
+          disabled={isSubmitting}
           type="submit"
         >
           {isSubmitting ? "A submeter..." : "Submeter candidatura"}
